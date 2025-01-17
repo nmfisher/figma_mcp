@@ -35,7 +35,7 @@ The plugin won't connect to the MCP server immediately - this will happen automa
 - uv from https://github.com/astral-sh/uv
 
 ```
-pushd server && uv pip install && popd
+pushd server && uv pip install --requirement pyproject.toml && popd
 ```
 
 
