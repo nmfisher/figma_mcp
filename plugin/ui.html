@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      font-family: Inter, sans-serif;
+      padding: 20px;
+    }
+    #status {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .connected {
+      background: #E2F5E2;
+      color: #0F6B0F;
+    }
+    .disconnected {
+      background: #FFE8E8;
+      color: #D62828;
+    }
+  </style>
+</head>
+<body>
+  <div id="status" class="disconnected">Connecting to MCP server...</div>
+
+  <script>
+    const status = document.getElementById('status');
+    let ws;
+
+    function connect() {
+      ws = new WebSocket('ws://localhost:8765');
+
+      ws.onopen = () => {
+        status.textContent = 'Connected to MCP server';
+        status.className = 'connected';
+      };
+
+      ws.onclose = (event) => {
+        if (event.wasClean) {
+          status.textContent = `Connection closed cleanly, code=${event.code} reason=${event.reason}`;
+        } else {
+          status.textContent = 'Disconnected from MCP server';
+        }
+        
+        status.className = 'disconnected';
+        
+        console.log('Socket is closed. Reconnect will be attempted in 3 seconds.', event.reason);
+        setTimeout(function() {
+          connect();
+        }, 3000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('Socket encountered error: ', error.message, 'Closing socket');
+        ws.close();
+      }
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          // Forward message to the plugin
+          parent.postMessage({ pluginMessage: message }, '*');
+        } catch (err) {
+          console.error('Failed to parse message:', err);
+        }
+      };
+    }
+
+    // Handle messages from the plugin
+    window.onmessage = (event) => {
+      if (event.data.pluginMessage) {
+        ws.send(JSON.stringify(event.data.pluginMessage));
+      }
+    };
+
+    // Initial connection
+    connect();
+  </script>
+</body>
+</html>

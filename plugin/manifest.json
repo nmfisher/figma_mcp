@@ -1,0 +1,14 @@
+{
+  "name": "MCP Bridge",
+  "id": "mcp-bridge-plugin",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"],
+    "devAllowedDomains": [
+      "ws://localhost:8765"
+    ]
+  }
+}
